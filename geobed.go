@@ -132,6 +132,7 @@ type GeobedCity struct {
 	// This could make lookup more accurate, easier, and faster even. IF the int uses less bytes than the two letter code string.
 	Country    string
 	Region     string
+	Province   string
 	Latitude   float64
 	Longitude  float64
 	Population int32
@@ -293,6 +294,7 @@ func (g *GeoBed) loadDataSets() {
 						c.CityAlt = string(fields[3])
 						c.Country = string(fields[8])
 						c.Region = string(fields[10])
+						c.Province = string(fields[11])
 						c.Latitude = lat
 						c.Longitude = lng
 						c.Population = int32(pop)
