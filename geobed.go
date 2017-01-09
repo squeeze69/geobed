@@ -132,7 +132,7 @@ type GeobedCity struct {
 	// This could make lookup more accurate, easier, and faster even. IF the int uses less bytes than the two letter code string.
 	Country    string
 	Region     string
-	Province	string
+	Province   string
 	Latitude   float64
 	Longitude  float64
 	Population int32
