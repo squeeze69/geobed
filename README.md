@@ -1,4 +1,4 @@
-Geobed
+Geobed - this fork has only small changes (the Province field)
 ============
 
 [![Build Status](https://drone.io/github.com/SocialHarvest/geobed/status.png)](https://drone.io/github.com/SocialHarvest/geobed/latest) [![Coverage Status](https://coveralls.io/repos/SocialHarvest/geobed/badge.png)](https://coveralls.io/r/SocialHarvest/geobed)
