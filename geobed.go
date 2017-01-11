@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/gob"
-	geohash "github.com/TomiHiltunen/geohash-golang"
 	"io"
 	"log"
 	"net/http"
@@ -15,6 +14,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	geohash "github.com/TomiHiltunen/geohash-golang"
 )
 
 // There are over 2.4 million cities in the world. The Geonames data set only contains 143,270 and the MaxMind set contains 567,382 and 3,173,959 in the other MaxMind set.
@@ -38,7 +39,7 @@ var dataSetFiles = []map[string]string{
 	//{"url": "http://geolite.maxmind.com/download/geoip/database/GeoLiteCity_CSV/GeoLiteCity-latest.zip", "path": "./geobed-data/GeoLiteCity-latest.zip", "id": "maxmindLiteCity"},
 }
 
-// A handy map of US state codes to full names.
+//UsSateCodes A handy map of US state codes to full names.
 var UsSateCodes = map[string]string{
 	"AL": "Alabama",
 	"AK": "Alaska",
@@ -152,6 +153,9 @@ var maxMindCityDedupeIdx map[string][]string
 var cityNameIdx map[string]int
 var locationDedupeIdx map[string]bool
 
+// nation filtering - if nil, everything pass, else the corresponding nation must be true
+var countryFilter map[string]bool
+
 // Information about each country from Geonames including; ISO codes, FIPS, country capital, area (sq km), population, and more.
 // Particularly useful for validating a location string contains a country name which can help the search process.
 // Adding to this info, a slice of partial geohashes to help narrow down reverse geocoding lookups (maps to country buckets).
@@ -203,6 +207,26 @@ func NewGeobed() GeoBed {
 	}
 
 	return g
+}
+
+func (g *GeoBed) allowedCountry(country string) bool {
+	if countryFilter == nil {
+		return true
+	}
+	return countryFilter[country]
+}
+
+//AddToNationFilter - add a nation to be kept
+func AddToCountryFilter(country string) {
+	if countryFilter == nil {
+		countryFilter = make(map[string]bool)
+	}
+	countryFilter[country] = true
+}
+
+//CleanNationFilter - remove nation filter
+func CleanCountryFilter() {
+	countryFilter = nil
 }
 
 // Downloads the data sets if needed.
@@ -301,7 +325,7 @@ func (g *GeoBed) loadDataSets() {
 						c.Geohash = gh
 
 						// Don't include entries without a city name. If we want to geocode the centers of countries and states, then we can do that faster through other means.
-						if len(c.City) > 0 {
+						if len(c.City) > 0 && g.allowedCountry(c.Country){
 							g.c = append(g.c, c)
 						}
 					}
@@ -384,7 +408,7 @@ func (g *GeoBed) loadDataSets() {
 							c.Geohash = gh
 
 							// Don't include entries without a city name. If we want to geocode the centers of countries and states, then we can do that faster through other means.
-							if len(c.City) > 0 && len(c.Country) > 0 {
+							if len(c.City) > 0 && len(c.Country) > 0 && g.allowedCountry(c.Country) {
 								g.c = append(g.c, c)
 							}
 						}
